@@ -1,34 +1,38 @@
+// Screen dimensions.
 const WIDTH = screen.width-50;
 const HEIGHT = screen.height-300;
 
+// Title and description.
 d3.select('body').append('h1').attr("id", "title").text('United States Educational Attainment');
 d3.select('body').append('h3').attr("id", "description").text("Percentage of adults age 25 and older with a bachelor\'s degree or higher (2010-2014)");
 
-var path = d3.geoPath();
-
+// SVG
 const svg = d3.select("body").append("svg").attr("width", WIDTH).attr("height", HEIGHT);
-
 var path = d3.geoPath();
 
-// US County Data
-fetch("https://cdn.freecodecamp.org/testable-projects-fcc/data/choropleth_map/counties.json")
-    .then(response => response.json())
-    .then(data => {
+// File locations
+const COUNTY_FILE = "https://cdn.freecodecamp.org/testable-projects-fcc/data/choropleth_map/counties.json";
+const EDUCATION_FILE = "https://cdn.freecodecamp.org/testable-projects-fcc/data/choropleth_map/for_user_education.json";
 
-        var geojson = topojson.feature(data, data.objects.counties);
+// Retrieve data
+d3.queue()
+    .defer(d3.json, COUNTY_FILE)
+    .defer(d3.json, EDUCATION_FILE)
+    .await(ready);
 
-        svg.selectAll('path').data(geojson.features)
-            .enter().append('path').attr('d', path)
-            .style("fill", "green");
+function ready(error, mapData, eduData) {
+    if (error) {
+        throw error;
+    }
 
-        d3.select("body").append("text").text(JSON.stringify(data.objects.counties));
-    });
+    // Map data
+    var geojson = topojson.feature(mapData, mapData.objects.counties);
 
-// US Educational Data
-/*
-fetch("https://cdn.freecodecamp.org/testable-projects-fcc/data/choropleth_map/for_user_education.json")
-    .then(response => response.json())
-    .then(data => {
-        d3.select("body").append("text").text(JSON.stringify(data));
-    });
-*/
+    svg.selectAll('path').data(geojson.features)
+        .enter().append('path')
+        .attr("class", "county")
+        .attr('d', path)
+        .style("fill", "green");
+
+    d3.select("body").append("text").text(JSON.stringify(eduData));
+}
