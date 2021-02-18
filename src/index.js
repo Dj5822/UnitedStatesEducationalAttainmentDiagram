@@ -32,7 +32,21 @@ function ready(error, mapData, eduData) {
         .enter().append('path')
         .attr("class", "county")
         .attr('d', path)
-        .style("fill", "green");
+        .style("fill", "green")
+        .attr("data-fips", (d) => d.id)
+        .attr("data-education", (d) => {
+            var result = eduData.filter(function (obj) {
+                return obj.fips == d.id;
+            })
+
+            if (result[0]) {
+                return result[0].bachelorsOrHigher;
+            }
+            else {
+                console.log("could not find data for ", d.id);
+                return 0;
+            }
+        });
 
     d3.select("body").append("text").text(JSON.stringify(eduData));
 }
