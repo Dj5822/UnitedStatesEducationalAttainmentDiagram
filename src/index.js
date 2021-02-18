@@ -20,6 +20,11 @@ d3.queue()
     .defer(d3.json, EDUCATION_FILE)
     .await(ready);
 
+// Returns the color corresponding to the education level. 
+var eduColor = d3.scaleThreshold()
+                .domain(d3.range(2.6, 75.1, (75.1 - 2.6) / 8))
+                .range(d3.schemeGreens[9]);
+
 function ready(error, mapData, eduData) {
     if (error) {
         throw error;
@@ -32,7 +37,6 @@ function ready(error, mapData, eduData) {
         .enter().append('path')
         .attr("class", "county")
         .attr('d', path)
-        .style("fill", "green")
         .attr("data-fips", (d) => d.id)
         .attr("data-education", (d) => {
             var result = eduData.filter(function (obj) {
@@ -45,6 +49,19 @@ function ready(error, mapData, eduData) {
             else {
                 console.log("could not find data for ", d.id);
                 return 0;
+            }
+        })
+        .style("fill", (d) => {
+            var result = eduData.filter(function (obj) {
+                return obj.fips == d.id;
+            })
+
+            if (result[0]) {
+                return eduColor(result[0].bachelorsOrHigher);
+            }
+            else {
+                console.log("could not find data for ", d.id);
+                return "white";
             }
         });
 
