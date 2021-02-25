@@ -28,15 +28,21 @@ var eduColor = d3.scaleThreshold()
 // Scale used for the legend.
 var xScale = d3.scaleLinear().domain([2.6, 75.1]).rangeRound([600, 860]);
 
-svg.selectAll("rect").data(d3.range(3, 66, (66 - 3) / 7)).enter().append("rect")
-        .attr("width", 33)
-        .attr("height", 10)
-        .attr("x", (d, i) => xScale(d))
-        .attr("y", 0)
-        .style("fill", (d, i) => eduColor(d));
-
 // Used create and format the legend.
-svg.call(
+var legend = svg
+  .append('g')
+  .attr('class', 'key')
+  .attr('id', 'legend')
+  .attr('transform', 'translate(0,40)');
+
+legend.selectAll("rect").data(d3.range(3, 66, (66 - 3) / 7)).enter().append("rect")
+  .attr("width", 33)
+  .attr("height", 10)
+  .attr("x", (d, i) => xScale(d))
+  .attr("y", 0)
+  .style("fill", (d, i) => eduColor(d));
+
+legend.call(
     d3.axisBottom(xScale)
         .tickSize(13)
         .tickFormat(function (xScale) {
@@ -106,9 +112,9 @@ function ready(error, mapData, eduData) {
                 return obj.fips == d.id;
             })
 
-            console.log(result);
             if (result[0]) {
                 eduText.text(result[0].area_name + ", " + result[0].state + ": " + result[0].bachelorsOrHigher + "%");
+                tooltip.attr("data-education", result[0].bachelorsOrHigher)
             }
         })
         .on("mouseout", (d, i) => {
