@@ -47,6 +47,17 @@ svg.call(
     .select('.domain')
     .remove();
 
+// tooltip
+var tooltip = d3.select('body').append('div')
+    .attr("id", "tooltip")
+    .style("height", "30px")
+    .style("opacity", 0)
+    .attr("data-education", "")
+    .style("left", WIDTH - 100 + "px")
+    .style("top", "0px");
+
+var eduText = tooltip.append("text").text("");
+
 function ready(error, mapData, eduData) {
     if (error) {
         throw error;
@@ -85,7 +96,24 @@ function ready(error, mapData, eduData) {
                 console.log("could not find data for ", d.id);
                 return "white";
             }
-        });   
+        })
+        .on("mouseover", (d, i) => {
+            tooltip.style("opacity", 1)
+                .style('left', d3.event.pageX + 10 + 'px')
+                .style('top', d3.event.pageY - 28 + 'px');
+            
+            var result = eduData.filter(function (obj) {
+                return obj.fips == d.id;
+            })
 
-    d3.select("body").append("text").text(JSON.stringify(eduData));
+            console.log(result);
+            if (result[0]) {
+                eduText.text(result[0].area_name + ", " + result[0].state + ": " + result[0].bachelorsOrHigher + "%");
+            }
+        })
+        .on("mouseout", (d, i) => {
+            tooltip.style("opacity", 0);
+            tooltip.style("left", WIDTH - 100 + "px")
+                .style("top", "0px");
+        });   
 }
