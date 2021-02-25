@@ -1,6 +1,6 @@
 // Screen dimensions.
-const WIDTH = screen.width-50;
-const HEIGHT = screen.height-300;
+const WIDTH = 1000;
+const HEIGHT = 620;
 
 // Title and description.
 d3.select('body').append('h1').attr("id", "title").text('United States Educational Attainment');
@@ -22,8 +22,30 @@ d3.queue()
 
 // Returns the color corresponding to the education level. 
 var eduColor = d3.scaleThreshold()
-                .domain(d3.range(2.6, 75.1, (75.1 - 2.6) / 8))
-                .range(d3.schemeGreens[9]);
+    .domain(d3.range(2.6, 75.1, (75.1 - 2.6) / 8))
+    .range(d3.schemeGreens[9]);
+
+// Scale used for the legend.
+var xScale = d3.scaleLinear().domain([2.6, 75.1]).rangeRound([600, 860]);
+
+svg.selectAll("rect").data(d3.range(3, 66, (66 - 3) / 7)).enter().append("rect")
+        .attr("width", 33)
+        .attr("height", 10)
+        .attr("x", (d, i) => xScale(d))
+        .attr("y", 0)
+        .style("fill", (d, i) => eduColor(d));
+
+// Used create and format the legend.
+svg.call(
+    d3.axisBottom(xScale)
+        .tickSize(13)
+        .tickFormat(function (xScale) {
+        return Math.round(xScale) + '%';
+        })
+        .tickValues(eduColor.domain())
+    )
+    .select('.domain')
+    .remove();
 
 function ready(error, mapData, eduData) {
     if (error) {
@@ -63,7 +85,7 @@ function ready(error, mapData, eduData) {
                 console.log("could not find data for ", d.id);
                 return "white";
             }
-        });
+        });   
 
     d3.select("body").append("text").text(JSON.stringify(eduData));
 }
